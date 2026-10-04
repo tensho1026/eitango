@@ -1,11 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { PGlite } from "@electric-sql/pglite";
-import { asc, eq, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/pglite";
-import { migrate } from "drizzle-orm/pglite/migrator";
-import * as schema from "../db/schema";
-import { BOOK_SLUG, parseWords, saveWords, validateWords, type VocabularyWord } from "../scripts/target1900";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { parseWords, saveLocalWords, validateWords, type VocabularyWord } from "../scripts/target1900";
 
 function fixture(): VocabularyWord[] {
   return Array.from({ length: 1900 }, (_, i) => ({ number: i + 1, word: `test-word-${i + 1}`, meaning: `テスト用の意味${i + 1}`, isNew: false }));
@@ -52,38 +50,24 @@ test("不正な番号・新規フラグを拒否する", () => {
   assert.throws(() => parseWords(table(fixture()).replace('<td></td>', '<td>?</td>')), /形式が不正/);
 });
 
-test("Postgresへの再取り込みでID・学習履歴を保持し、途中失敗は全件ロールバックする", async () => {
-  const client = new PGlite();
-  const db = drizzle(client, { schema });
+test("ローカルファイルへ保存し、再取得でIDを維持し、不完全なデータは上書きしない", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "eitango-import-"));
+  const destination = join(directory, "data", "target1900.json");
   try {
-    await migrate(db, { migrationsFolder: "./drizzle" });
-    // 同じマイグレーションを再実行できる。
-    await migrate(db, { migrationsFolder: "./drizzle" });
     const words = fixture();
-    assert.equal(await saveWords(db, words), 1900);
-    const original = await db.select().from(schema.vocabularyWords).orderBy(asc(schema.vocabularyWords.number));
-    await db.execute(sql`CREATE TABLE test_progress (word_id uuid PRIMARY KEY REFERENCES vocabulary_words(id), correct_count integer NOT NULL)`);
-    await db.execute(sql`INSERT INTO test_progress VALUES (${original[0].id}, 7)`);
-
-    // SQLの構文に見える文字列もデータとして保存される。
-    words[0].meaning = "' ; DROP TABLE vocabulary_words; -- テスト";
-    await saveWords(db, words);
-    const updated = await db.select().from(schema.vocabularyWords).where(eq(schema.vocabularyWords.bookSlug, BOOK_SLUG)).orderBy(asc(schema.vocabularyWords.number));
-    assert.equal(updated.length, 1900);
-    assert.deepEqual(updated.map((row) => row.id), original.map((row) => row.id));
-    assert.equal(updated[0].meaning, words[0].meaning);
-    assert.equal(updated[0].createdAt.getTime(), original[0].createdAt.getTime());
-    assert.equal(updated[1].updatedAt.getTime(), original[1].updatedAt.getTime());
-    assert.equal((await client.query<{ correct_count: number }>("SELECT correct_count FROM test_progress")).rows[0].correct_count, 7);
-
-    await db.execute(sql`CREATE FUNCTION test_reject_word() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF NEW.word = 'reject-me' THEN RAISE EXCEPTION 'deliberate failure'; END IF; RETURN NEW; END $$`);
-    await db.execute(sql`CREATE TRIGGER test_failure BEFORE INSERT OR UPDATE ON vocabulary_words FOR EACH ROW EXECUTE FUNCTION test_reject_word()`);
-    words[0].meaning = "この変更もロールバックされる";
-    words[350].word = "reject-me";
-    await assert.rejects(saveWords(db, words));
-    const [afterFailure] = await db.select().from(schema.vocabularyWords).where(eq(schema.vocabularyWords.number, 1));
-    assert.equal(afterFailure.meaning, updated[0].meaning);
+    assert.equal(await saveLocalWords([...words].reverse(), destination), 1900);
+    const original = JSON.parse(await readFile(destination, "utf8"));
+    assert.equal(original.words[0].number, 1);
+    assert.equal(original.words[1899].number, 1900);
+    words[0].meaning = "更新した意味；注釈（⇒ 223）";
+    await saveLocalWords(words, destination);
+    const saved = await readFile(destination, "utf8");
+    const updated = JSON.parse(saved);
+    assert.deepEqual(updated.words.map((row: { id: string }) => row.id), original.words.map((row: { id: string }) => row.id));
+    assert.equal(updated.words[0].meaning, words[0].meaning);
+    await assert.rejects(saveLocalWords(words.slice(1), destination), /1900件必要/);
+    assert.equal(await readFile(destination, "utf8"), saved);
   } finally {
-    await client.close();
+    await rm(directory, { recursive: true, force: true });
   }
 });

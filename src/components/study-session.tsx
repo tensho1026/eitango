@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type CSSProperties } from "react";
 import { advanceStudy, INITIAL_STUDY_STATE, STUDY_RANGES, type StudyRange, type StudyWord } from "@/lib/study";
 
 function Arrow({ down = false }: { down?: boolean }) {
@@ -64,7 +64,7 @@ export function StudySession({ words, range }: { words: StudyWord[]; range: Stud
               <p>{range.start}〜{range.end}番、{words.length}語。おつかれさまでした。</p>
             </div> : <>
               <p className="word-number">WORD {String(current.number).padStart(4, "0")}</p>
-              <h2 className="english-word" lang="en">{current.word}</h2>
+              <h2 className="english-word" lang="en" style={{ "--word-length": current.word.length } as CSSProperties}>{current.word}</h2>
               <div className="meaning-area">
                 {state.revealed ? <div className="meaning-reveal"><span className="meaning-label">MEANING</span><p>{current.meaning}</p></div> : <p className="meaning-hint"><span aria-hidden="true">···</span>どんな意味だったかな？</p>}
               </div>

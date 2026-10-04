@@ -1,7 +1,7 @@
 import { load } from "cheerio";
-import { count, eq, sql } from "drizzle-orm";
-import type { PgDatabase, PgQueryResultHKT } from "drizzle-orm/pg-core";
-import * as schema from "../db/schema";
+import { mkdir, readFile, rename, rm, writeFile } from "node:fs/promises";
+import { dirname } from "node:path";
+import { randomUUID } from "node:crypto";
 
 export const SOURCE_URL = "https://ukaru-eigo.com/target-1900-word-list/";
 export const BOOK_SLUG = "target-1900-6th";
@@ -55,29 +55,28 @@ export async function fetchWords(): Promise<VocabularyWord[]> {
   return parseWords(await response.text());
 }
 
-export async function saveWords<T extends PgQueryResultHKT>(db: PgDatabase<T, typeof schema>, words: VocabularyWord[]) {
+export async function saveLocalWords(words: VocabularyWord[], destination: string) {
   validateWords(words);
-  const { vocabularyBooks, vocabularyWords } = schema;
-  return db.transaction(async (tx) => {
-    await tx.insert(vocabularyBooks).values({
-      slug: BOOK_SLUG, title: "英単語ターゲット1900", edition: "6訂版", sourceUrl: SOURCE_URL,
-    }).onConflictDoUpdate({
-      target: vocabularyBooks.slug,
-      set: { sourceUrl: SOURCE_URL, importedAt: sql`now()` },
-    });
-
-    // 250件ずつ挿入するが、全件を同一トランザクションで処理する。
-    for (let offset = 0; offset < words.length; offset += 250) {
-      await tx.insert(vocabularyWords).values(
-        words.slice(offset, offset + 250).map((entry) => ({ ...entry, bookSlug: BOOK_SLUG })),
-      ).onConflictDoUpdate({
-        target: [vocabularyWords.bookSlug, vocabularyWords.number],
-        set: { word: sql`excluded.word`, meaning: sql`excluded.meaning`, isNew: sql`excluded.is_new`, updatedAt: sql`now()` },
-        setWhere: sql`(${vocabularyWords.word}, ${vocabularyWords.meaning}, ${vocabularyWords.isNew}) IS DISTINCT FROM (excluded.word, excluded.meaning, excluded.is_new)`,
-      });
-    }
-    const [result] = await tx.select({ total: count() }).from(vocabularyWords).where(eq(vocabularyWords.bookSlug, BOOK_SLUG));
-    if (result.total !== EXPECTED_COUNT) throw new Error(`DB内の件数が1900件ではありません: ${result.total}`);
-    return result.total;
-  });
+  let previous: { words: (VocabularyWord & { id: string })[] } | undefined;
+  try {
+    const existing = JSON.parse(await readFile(destination, "utf8")) as NonNullable<typeof previous>;
+    validateWords(existing.words);
+    previous = existing;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+  }
+  const ids = new Map(previous?.words.map((word) => [word.number, word.id]));
+  const payload = {
+    title: "英単語ターゲット1900", edition: "6訂版", sourceUrl: SOURCE_URL,
+    words: [...words].sort((a, b) => a.number - b.number).map((word) => ({ id: ids.get(word.number) ?? `${BOOK_SLUG}-${word.number}`, ...word })),
+  };
+  await mkdir(dirname(destination), { recursive: true });
+  const temporary = `${destination}.${randomUUID()}.tmp`;
+  try {
+    await writeFile(temporary, JSON.stringify(payload, null, 2) + "\n");
+    await rename(temporary, destination);
+  } finally {
+    await rm(temporary, { force: true });
+  }
+  return payload.words.length;
 }

@@ -7,6 +7,6 @@ export default async function Home({ searchParams }: {
 }) {
   const params = await searchParams;
   const range = getRange(params.start);
-  const words = await getStudyWords(range);
+  const words = getStudyWords(range);
   return <StudySession key={range.start} words={words} range={range} />;
 }
