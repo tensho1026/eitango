@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { DifficultWordsProvider } from "@/components/difficult-words-provider";
+import { LearningProgressProvider } from "@/components/learning-progress-provider";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -8,5 +9,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return <html lang="ja"><body><DifficultWordsProvider>{children}</DifficultWordsProvider></body></html>;
+  return <html lang="ja"><body><DifficultWordsProvider><LearningProgressProvider>{children}</LearningProgressProvider></DifficultWordsProvider></body></html>;
 }

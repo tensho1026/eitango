@@ -1,12 +1,13 @@
-import { StudySession } from "@/components/study-session";
+import { StudyWorkspace } from "@/components/study-workspace";
 import { getStudyWords } from "@/lib/words";
-import { getRange, getStudyMode } from "@/lib/study";
+import { getRange } from "@/lib/study";
+import { getLearningConfig, getSessionKey, type LearningParams } from "@/lib/learning";
 
 export default async function StudyPage({ searchParams }: {
-  searchParams: Promise<{ start?: string | string[]; mode?: string | string[] }>;
+  searchParams: Promise<LearningParams>;
 }) {
   const params = await searchParams;
   const range = getRange(params.start);
-  const mode = getStudyMode(params.mode);
-  return <StudySession key={`${range.start}-${mode}`} words={getStudyWords(range)} mode={mode} />;
+  const config = getLearningConfig("range", params);
+  return <StudyWorkspace key={getSessionKey(config)} words={getStudyWords(range)} config={config} />;
 }

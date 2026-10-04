@@ -1,8 +1,8 @@
 import { DifficultReview } from "@/components/difficult-review";
-import { getStudyMode } from "@/lib/study";
+import { getLearningConfig, getSessionKey, type LearningParams } from "@/lib/learning";
 import { getAllStudyWords } from "@/lib/words";
 
-export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ mode?: string | string[] }> }) {
-  const mode = getStudyMode((await searchParams).mode);
-  return <DifficultReview key={mode} words={getAllStudyWords()} mode={mode} />;
+export default async function ReviewPage({ searchParams }: { searchParams: Promise<LearningParams> }) {
+  const config = getLearningConfig("review", await searchParams);
+  return <DifficultReview key={getSessionKey(config)} words={getAllStudyWords()} config={config} />;
 }

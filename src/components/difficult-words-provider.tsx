@@ -6,7 +6,7 @@ import { isWordNumber } from "@/lib/difficult";
 type DifficultContext = {
   numbers: number[]; loaded: boolean; pendingNumber: number | null; error: string | null;
   refresh: (signal?: AbortSignal) => Promise<void>;
-  setSaved: (number: number, saved: boolean) => Promise<void>;
+  setSaved: (number: number, saved: boolean) => Promise<boolean>;
 };
 const Context = createContext<DifficultContext | null>(null);
 
@@ -38,7 +38,7 @@ export function DifficultWordsProvider({ children }: { children: React.ReactNode
   }, []);
 
   const setSaved = useCallback(async (number: number, saved: boolean) => {
-    if (saving.current || !isWordNumber(number)) return;
+    if (saving.current || !isWordNumber(number)) return false;
     saving.current = true;
     ++sequence.current;
     setPendingNumber(number); setError(null);
@@ -48,8 +48,10 @@ export function DifficultWordsProvider({ children }: { children: React.ReactNode
         body: JSON.stringify({ number, saved }),
       }));
       setNumbers(result); setLoaded(true);
+      return true;
     } catch {
       setError("苦手単語の登録を保存できませんでした。");
+      return false;
     } finally {
       saving.current = false; setPendingNumber(null);
     }
