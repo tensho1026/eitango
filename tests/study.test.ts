@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { advanceStudy, getRange, INITIAL_STUDY_STATE, STUDY_RANGES } from "../src/lib/study";
+import { advanceStudy, advanceAutoStudy, getRange, getStudyMode, getInitialStudyState, INITIAL_STUDY_STATE, STUDY_RANGES } from "../src/lib/study";
 
 test("1900語を、200語ずつ9区分と最後の100語に分ける", () => {
   assert.equal(STUDY_RANGES.length, 10);
@@ -32,5 +32,33 @@ test("同じボタンで意味表示→次の単語を繰り返し、最後に�
     assert.equal(state.complete, true);
     assert.equal(state.index, total - 1);
     assert.deepEqual(advanceStudy(state, total), INITIAL_STUDY_STATE);
+  }
+});
+
+test("自動モードだけを受け付け、未指定・不正値は通常モードに戻す", () => {
+  assert.equal(getStudyMode("auto"), "auto");
+  for (const value of [undefined, "manual", "AUTO", "unknown", ["auto", "manual"]]) {
+    assert.equal(getStudyMode(value), "manual");
+  }
+  assert.deepEqual(getInitialStudyState("manual"), INITIAL_STUDY_STATE);
+});
+
+test("自動モードは最初から意味を表示し、全単語を一度ずつ進んで完了後は停止する", () => {
+  for (const total of [200, 100]) {
+    let state = getInitialStudyState("auto");
+    const visited: number[] = [];
+    for (let index = 0; index < total; index++) {
+      assert.equal(state.index, index);
+      assert.equal(state.revealed, true);
+      assert.equal(state.complete, false);
+      visited.push(state.index);
+      state = advanceAutoStudy(state, total);
+    }
+    assert.deepEqual(visited, Array.from({ length: total }, (_, index) => index));
+    assert.equal(state.complete, true);
+    assert.equal(state.index, total - 1);
+    assert.equal(advanceAutoStudy(state, total), state);
+    const restarted = getInitialStudyState("auto");
+    assert.deepEqual(restarted, { index: 0, revealed: true, complete: false });
   }
 });
