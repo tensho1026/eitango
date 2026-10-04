@@ -1,12 +1,18 @@
-import { StudySession } from "@/components/study-session";
-import { getStudyWords } from "@/lib/words";
-import { getRange } from "@/lib/study";
+import Link from "next/link";
+import { STUDY_RANGES } from "@/lib/study";
 
-export default async function Home({ searchParams }: {
-  searchParams: Promise<{ start?: string | string[] }>;
-}) {
-  const params = await searchParams;
-  const range = getRange(params.start);
-  const words = getStudyWords(range);
-  return <StudySession key={range.start} words={words} range={range} />;
+export default function Home() {
+  return (
+    <main className="home-screen">
+      <h1>ターゲット1900</h1>
+      <h2>学習する範囲</h2>
+      <nav className="range-grid" aria-label="学習する範囲">
+        {STUDY_RANGES.map((range) => (
+          <Link className="range-option" href={`/study?start=${range.start}`} key={range.start}>
+            {range.start}〜{range.end}番
+          </Link>
+        ))}
+      </nav>
+    </main>
+  );
 }
