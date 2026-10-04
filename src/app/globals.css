@@ -16,7 +16,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
 .home-screen h2 { font-size: 15px; font-weight: 500; color: var(--muted); margin: 0 0 16px; }
 .mode-selector { padding: 0; border: 0; margin: 0 0 28px; min-width: 0; }
 .mode-selector legend { padding: 0; font-size: 15px; color: var(--muted); margin-bottom: 16px; }
-.mode-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.mode-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .mode-option { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 12px 8px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 16px; cursor: pointer; }
 .mode-option input { width: 16px; height: 16px; margin: 0; accent-color: var(--ink); }
 .mode-option:has(input:checked) { border-color: var(--ink); background: #eff3ec; }
@@ -57,6 +57,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
   .difficult-button:hover, .review-option:not(:disabled):hover { background: #eff3ec; }
 }
 @media (max-width: 600px) {
+  .mode-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mode-option:first-child { grid-column: 1 / -1; }
   .english-word { font-size: clamp(26px, calc(160cqw / var(--word-length, 6)), 56px); }
   .meaning { font-size: 17px; }
   .meaning-area { min-height: 100px; margin-top: 24px; }

@@ -10,16 +10,19 @@ export const STUDY_RANGES = Array.from({ length: Math.ceil(TOTAL_WORDS / WORDS_P
 export type StudyRange = (typeof STUDY_RANGES)[number];
 export type StudyWord = { id: string; number: number; word: string; meaning: string };
 export type StudyState = { index: number; revealed: boolean; complete: boolean };
-export type StudyMode = "manual" | "auto";
-export const AUTO_ADVANCE_MS = 3000;
+export type StudyMode = "manual" | "auto2" | "auto";
 export const INITIAL_STUDY_STATE: StudyState = { index: 0, revealed: false, complete: false };
 
 export function getStudyMode(mode?: string | string[]): StudyMode {
-  return mode === "auto" ? "auto" : "manual";
+  return mode === "auto" || mode === "auto2" ? mode : "manual";
+}
+
+export function getAutoAdvanceMs(mode: StudyMode): number | null {
+  return mode === "auto2" ? 2000 : mode === "auto" ? 3000 : null;
 }
 
 export function getInitialStudyState(mode: StudyMode): StudyState {
-  return { ...INITIAL_STUDY_STATE, revealed: mode === "auto" };
+  return { ...INITIAL_STUDY_STATE, revealed: mode !== "manual" };
 }
 
 export function getRange(start?: string | string[]): StudyRange {

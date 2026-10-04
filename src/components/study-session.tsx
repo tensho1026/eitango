@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type CSSProperties } from "react";
-import { advanceStudy, advanceAutoStudy, AUTO_ADVANCE_MS, getInitialStudyState, type StudyMode, type StudyWord } from "@/lib/study";
+import { advanceStudy, advanceAutoStudy, getAutoAdvanceMs, getInitialStudyState, type StudyMode, type StudyWord } from "@/lib/study";
 import { splitMeaning } from "@/lib/meaning";
 import { useDifficultWords } from "./difficult-words-provider";
 
@@ -11,15 +11,16 @@ export function StudySession({ words, mode, onRestart }: { words: StudyWord[]; m
   const current = words[state.index];
   const { numbers, loaded, pendingNumber, error, setSaved } = useDifficultWords();
   const saved = numbers.includes(current.number);
+  const autoAdvanceMs = getAutoAdvanceMs(mode);
   const actionLabel = state.complete ? "もう一度学習する" : !state.revealed ? "意味を見る" : state.index + 1 === words.length ? "完了する" : "次の単語へ";
 
   useEffect(() => {
-    if (mode !== "auto" || state.complete) return;
+    if (autoAdvanceMs === null || state.complete) return;
     const timer = window.setTimeout(() => {
       setState((previous) => advanceAutoStudy(previous, words.length));
-    }, AUTO_ADVANCE_MS);
+    }, autoAdvanceMs);
     return () => window.clearTimeout(timer);
-  }, [mode, state.index, state.complete, words.length]);
+  }, [autoAdvanceMs, state.index, state.complete, words.length]);
 
   return (
     <>
@@ -36,7 +37,7 @@ export function StudySession({ words, mode, onRestart }: { words: StudyWord[]; m
         </svg>
       </button>}
       {error && <p className="difficult-error" role="alert">{error}</p>}
-      <main className={`study-screen${mode === "auto" && !state.complete ? " is-auto" : ""}`} aria-label="英単語の学習">
+      <main className={`study-screen${autoAdvanceMs !== null && !state.complete ? " is-auto" : ""}`} aria-label="英単語の学習">
         <div className="study-content" id="word-content" aria-live="polite" aria-atomic="true">
           {state.complete ? <h1 className="completion-title">完了</h1> : <>
             <h1 className="english-word" lang="en" style={{ "--word-length": current.word.length } as CSSProperties}>{current.word}</h1>

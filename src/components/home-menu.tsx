@@ -20,13 +20,17 @@ export function HomeMenu() {
             通常
           </label>
           <label className="mode-option">
+            <input type="radio" name="study-mode" value="auto2" checked={mode === "auto2"} onChange={() => setMode("auto2")} />
+            自動（2秒）
+          </label>
+          <label className="mode-option">
             <input type="radio" name="study-mode" value="auto" checked={mode === "auto"} onChange={() => setMode("auto")} />
             自動（3秒）
           </label>
         </div>
       </fieldset>
       <div className="review-entry">
-        {loaded && numbers.length > 0 ? <Link className="review-option" href={`/review${mode === "auto" ? "?mode=auto" : ""}`} prefetch={false}>
+        {loaded && numbers.length > 0 ? <Link className="review-option" href={`/review${mode !== "manual" ? `?mode=${mode}` : ""}`} prefetch={false}>
           苦手単語だけ復習<span>{numbers.length}語</span>
         </Link> : <button className="review-option" disabled>苦手単語だけ復習<span>{loaded ? "0語" : "…"}</span></button>}
         {loaded && numbers.length === 0 && <p className="review-hint">学習画面の☆で登録できます。</p>}
@@ -35,7 +39,7 @@ export function HomeMenu() {
       <h2>学習する範囲</h2>
       <nav className="range-grid" aria-label="学習する範囲">
         {STUDY_RANGES.map((range) => (
-          <Link className="range-option" href={`/study?start=${range.start}${mode === "auto" ? "&mode=auto" : ""}`} key={range.start}>
+          <Link className="range-option" href={`/study?start=${range.start}${mode !== "manual" ? `&mode=${mode}` : ""}`} key={range.start}>
             {range.start}〜{range.end}番
           </Link>
         ))}
