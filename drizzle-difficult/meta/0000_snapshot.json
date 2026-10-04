@@ -1,0 +1,64 @@
+{
+  "id": "3815f10c-89bb-48da-9d51-6e2eaba7d9ab",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.difficult_words": {
+      "name": "difficult_words",
+      "schema": "",
+      "columns": {
+        "learner_id": {
+          "name": "learner_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "word_number": {
+          "name": "word_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "difficult_words_learner_id_word_number_pk": {
+          "name": "difficult_words_learner_id_word_number_pk",
+          "columns": [
+            "learner_id",
+            "word_number"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "difficult_words_number_check": {
+          "name": "difficult_words_number_check",
+          "value": "\"difficult_words\".\"word_number\" BETWEEN 1 AND 1900"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

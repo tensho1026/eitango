@@ -23,6 +23,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
 .mode-option:has(input:focus-visible) { outline: 3px solid #8fa879; outline-offset: 4px; }
 .range-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .range-option { display: grid; place-items: center; min-height: 64px; padding: 12px; background: #fff; border: 1px solid var(--line); border-radius: 10px; font-size: 17px; font-variant-numeric: tabular-nums; }
+.review-entry { margin-bottom: 28px; }
+.review-option { width: 100%; min-height: 56px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: #fff; border: 1px solid var(--line); border-radius: 10px; font-size: 16px; }
+.review-option span { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.review-option:disabled { opacity: .6; }
+.review-hint { margin: 10px 0 0; color: var(--muted); font-size: 12px; }
+.review-error { color: #c62828; font-size: 13px; line-height: 1.8; }
+.review-error button { margin-left: 10px; border: 0; background: transparent; text-decoration: underline; color: inherit; cursor: pointer; }
 .study-screen { container-type: inline-size; width: min(720px, calc(100% - 32px)); min-height: 100vh; min-height: 100svh; margin: 0 auto; display: flex; flex-direction: column; padding-top: max(24px, env(safe-area-inset-top)); padding-bottom: calc(clamp(18px, 6svh, 64px) + env(safe-area-inset-bottom)); }
 .study-content { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0; text-align: center; min-height: 230px; }
 .study-screen.is-auto { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
@@ -31,6 +38,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
 .meaning { margin: 0; color: #c62828; font-size: 20px; line-height: 1.8; overflow-wrap: anywhere; }
 .meaning + .meaning { margin-top: 6px; }
 .home-link { position: fixed; top: max(16px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left)); z-index: 1; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: var(--ink); }
+.difficult-button { position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 1; display: grid; place-items: center; width: 48px; height: 48px; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--ink); cursor: pointer; }
+.difficult-button.is-saved { color: #9b6900; }
+.difficult-button:disabled { opacity: .45; cursor: wait; }
+.difficult-error { position: fixed; top: max(68px, calc(env(safe-area-inset-top) + 52px)); right: 16px; max-width: calc(100% - 32px); color: #c62828; font-size: 12px; }
 .study-controls { width: min(360px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .study-button, .home-button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; padding: 14px 16px; border-radius: 10px; font-size: 16px; cursor: pointer; }
 .study-button { background: var(--ink); color: #fff; border: 1px solid var(--ink); }
@@ -43,6 +54,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
   .study-button:hover { background: #3c5544; }
   .home-button:hover { background: #eff3ec; }
   .home-link:hover { background: #eff3ec; }
+  .difficult-button:hover, .review-option:not(:disabled):hover { background: #eff3ec; }
 }
 @media (max-width: 600px) {
   .english-word { font-size: clamp(26px, calc(160cqw / var(--word-length, 6)), 56px); }

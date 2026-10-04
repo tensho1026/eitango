@@ -3,9 +3,11 @@
 import Link from "next/link";
 import { useState } from "react";
 import { STUDY_RANGES, type StudyMode } from "@/lib/study";
+import { useDifficultWords } from "./difficult-words-provider";
 
 export function HomeMenu() {
   const [mode, setMode] = useState<StudyMode>("manual");
+  const { numbers, loaded, error, refresh } = useDifficultWords();
 
   return (
     <main className="home-screen">
@@ -23,6 +25,13 @@ export function HomeMenu() {
           </label>
         </div>
       </fieldset>
+      <div className="review-entry">
+        {loaded && numbers.length > 0 ? <Link className="review-option" href={`/review${mode === "auto" ? "?mode=auto" : ""}`} prefetch={false}>
+          苦手単語だけ復習<span>{numbers.length}語</span>
+        </Link> : <button className="review-option" disabled>苦手単語だけ復習<span>{loaded ? "0語" : "…"}</span></button>}
+        {loaded && numbers.length === 0 && <p className="review-hint">学習画面の☆で登録できます。</p>}
+        {error && <p className="review-error" role="alert">{error}<button onClick={() => { void refresh(); }}>再試行</button></p>}
+      </div>
       <h2>学習する範囲</h2>
       <nav className="range-grid" aria-label="学習する範囲">
         {STUDY_RANGES.map((range) => (

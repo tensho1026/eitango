@@ -10,19 +10,27 @@
     "import:words": "tsx scripts/import-target1900.ts",
     "test": "tsx --test tests/*.test.ts",
     "typecheck": "next typegen && tsc --noEmit",
-    "check:secrets": "tsx scripts/check-secrets.ts"
+    "check:secrets": "tsx scripts/check-secrets.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "tsx scripts/migrate-difficult.ts"
   },
   "dependencies": {
     "@next/env": "^16.3.8",
     "cheerio": "^1.2.0",
+    "drizzle-orm": "^0.45.3",
     "next": "16.3.8",
+    "pg": "^8.23.1",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.3.8",
     "tsx": "^4.23.15",
