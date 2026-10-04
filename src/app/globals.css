@@ -20,7 +20,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
 .study-content { flex: 1; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px 0; text-align: center; min-height: 230px; }
 .english-word { max-width: 100%; margin: 0; font-size: 64px; font-size: clamp(28px, calc(160cqw / var(--word-length, 6)), 88px); font-weight: 500; letter-spacing: -.035em; line-height: 1.15; overflow-wrap: anywhere; }
 .meaning-area { width: 100%; min-height: 96px; margin-top: 28px; }
-.meaning { margin: 0; font-size: 20px; line-height: 1.8; overflow-wrap: anywhere; }
+.meaning { margin: 0; color: #c62828; font-size: 20px; line-height: 1.8; overflow-wrap: anywhere; }
+.home-link { position: fixed; top: max(16px, env(safe-area-inset-top)); right: max(16px, env(safe-area-inset-right)); z-index: 1; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; color: var(--ink); }
 .study-controls { width: min(360px, 100%); margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
 .study-button, .home-button { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; padding: 14px 16px; border-radius: 10px; font-size: 16px; cursor: pointer; }
 .study-button { background: var(--ink); color: #fff; border: 1px solid var(--ink); }
@@ -32,6 +33,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #8fa879; outline-offs
   .range-option:hover { background: #f0f4ed; }
   .study-button:hover { background: #3c5544; }
   .home-button:hover { background: #eff3ec; }
+  .home-link:hover { background: #eff3ec; }
 }
 @media (max-width: 600px) {
   .english-word { font-size: clamp(26px, calc(160cqw / var(--word-length, 6)), 56px); }
